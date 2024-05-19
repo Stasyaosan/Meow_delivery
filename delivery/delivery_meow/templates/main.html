@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="wrapper">
+        <div class="left">
+            <div class="logo">
+                <img src="/static/images/logo.png">
+            </div>
+            <div class="reg_auth">
+                {% if error != '' %}
+                   <p>{{error}}</p>
+                {% endif %}
+                {% if suc != '' %}
+                   <p>{{suc}}</p>
+                {% endif %}
+                <form method="post" action="/reg">
+                    {% csrf_token %}
+                    <div class="group_form">
+                        <div><label>Email:</label></div>
+                        <div><input type="text" name="email" required></div>
+                    </div>
+                    <div class="group_form">
+                        <div><label>Телефон:</label></div>
+                        <div><input type="text" name="phone" id="phone"></div>
+                    </div>
+                    <div class="group_form">
+                        <div><label>Пароль:</label></div>
+                        <div><input type="password" name="password" required></div>
+                    </div>
+                    <div class="group_form">
+                        <div><label>Роль:</label></div>
+                        <div>
+                            <select name="role" id="">
+                                <option value="Курьер">Курьер</option>
+                                <option value="Клиент">Клиент</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="rep_password group_form" >
+                        <a href="#">Забыли пароль</a>
+                    </div>
+                    <div class="buttons group_form">
+                        <button class="auth" name="auth">Авторизация</button>
+                        <button class="reg" name="reg">Регистрация</button>
+                    </div>
+                </form>
+
+            </div>
+            <div class="banner">
+                <img src="images/" alt="Реклама">
+            </div>
+        </div>
+        <div class="conteiner">
+            {% block content %}{% endblock content%}
+        </div>
+    </div>
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/jquery.maskedinput.min.js"></script>
+<script>
+    $('#phone').mask("+9(999) 999-99-99");
+</script>
+</body>
+</html>
