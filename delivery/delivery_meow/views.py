@@ -9,10 +9,16 @@ from .models import *
 
 
 def index(request):
-    return render(request, 'index.html')
+    current_user = User.objects.filter(email=request.session['user']).first()
+
+    return render(request, 'index.html', {'current_user': current_user})
 
 
 def reg(request):
+    if 'user' in request.session:
+        current_user = User.objects.filter(email=request.session['user']).first()
+    else:
+        current_user = ''
     if request.method == 'POST':
         suc = ''
         error = ''
@@ -36,11 +42,11 @@ def reg(request):
                           recipient_list=[email])
 
                 suc += 'Подтревдите акаунт в Email письме'
-                return render(request, 'suc.html', {'suc': suc})
+                return render(request, 'suc.html', {'suc': suc, 'current_user': current_user})
             else:
                 error += 'Такой пользователь уже есть'
 
-                return render(request, 'suc.html', {'error': error})
+                return render(request, 'suc.html', {'error': error, 'current_user': current_user})
 
         elif 'auth' in request.POST:
             error = ''
@@ -48,23 +54,32 @@ def reg(request):
             password = request.POST['password']
             if User.objects.filter(email=email).exists():
                 user = User.objects.filter(email=email).first()
-                if check_password(password, user.password):
-                    request.session['user'] = email
+                if user.suc != 0:
+                    if check_password(password, user.password):
+                        request.session['user'] = email
+                    else:
+                        error += 'Пароль введен не корректно!'
                 else:
-                    error = 'Неправильный пароль!'
+                    error += 'Учетная запись не активирована!'
             else:
-                error = 'Такого пользователя нет!'
-            return render(request, 'suc.html', {'error': error})
+                error += 'Такого пользователя не существует!'
+            return render(request, 'suc.html', {'error': error, 'current_user': current_user})
 
 
 def suc_user(request, token):
-    if User.objects.filter(token=token).exists:
+    if User.objects.filter(token=token).exists():
         User.objects.filter(token=token).update(suc=1, token='')
-        return HttpResponse('Вы успешно активировали учётную запись <a href="/">Перейти на сайт</a>')
+        return HttpResponse('Вы успешно активировали свою учетную запись! <a href="/">Перейти на сайт</a>')
     else:
-        return HttpResponse('Токен неверный!!')
+        return HttpResponse('Token не верный!')
 
 
 def generate_Token():
-    s = 'asdfklewjtw;ogkassdk@#$%$$$#GGUYGUYGUYTFlgfnmsdklgnhythbGUYHJERIGVKGIfdfsdf564643!!!!@@@@#wjklegnweklfgfgerygfyegydfgYYYGY656565rfyrgye'
+    s = 'asdfklewjtwogkassdkGGUYGUYGUYTFlgfnmsdklgnhythbGUYHJERIGVKGIfdfsdf564643wjklegnweklfgfgerygfyegydfgYYYGY656565rfyrgye'
     return ''.join([s[random.randint(0, len(s) - 1)] for i in range(32)])
+
+
+def logout(request):
+    if request.method == 'POST' and 'user' in request.session:
+        del request.session['user']
+    return redirect('/')

@@ -12,7 +12,7 @@ class User(models.Model):
     email = models.EmailField(verbose_name='Email: ')
     password = models.CharField(max_length=100, verbose_name='Пароль')
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
-    login = models.CharField(max_length=100, verbose_name='Логин', null=True)
+    login = models.CharField(max_length=100, verbose_name='Логин', null=True, default='')
     phone = models.CharField(max_length=100, verbose_name='Телефон', null=True)
     level = models.IntegerField(default=0)
     token = models.TextField(null=True)
