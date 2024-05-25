@@ -15,7 +15,7 @@ class User(models.Model):
     login = models.CharField(max_length=100, verbose_name='Логин', null=True, default='')
     phone = models.CharField(max_length=100, verbose_name='Телефон', null=True)
     level = models.IntegerField(default=0)
-    token = models.TextField(null=True)
+    token = models.TextField(null=True, blank=True)
     suc = models.IntegerField(default=0)
 
 

@@ -48,6 +48,13 @@ input {
 
 button {
     background: #FEC8B0;
+    border: none;
+    cursor: pointer;
+    transition: all .5s;
+}
+
+button:hover {
+    background: #E9967A;
 }
 
 .conteiner{

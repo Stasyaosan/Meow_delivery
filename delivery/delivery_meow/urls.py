@@ -6,4 +6,5 @@ urlpatterns = [
     path('reg', reg),
     path('suc/<str:token>', suc_user),
     path('logout', logout),
+    path('update', update),
 ]

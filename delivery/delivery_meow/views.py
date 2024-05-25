@@ -6,12 +6,18 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from .models import *
+from .get_geo import get_geo
 
 
 def index(request):
-    current_user = User.objects.filter(email=request.session['user']).first()
+    if 'user' in request.session:
+        current_user = User.objects.filter(email=request.session['user']).first()
+    else:
+        current_user = ''
+    geo = get_geo('посёлок молодёжный парфеньевский муниципальный округ костромская область')
 
-    return render(request, 'index.html', {'current_user': current_user})
+    return render(request, 'index.html', {'current_user': current_user, 'geo_lat': geo['geo_lat'],
+                                          'geo_lon': geo['geo_lon']})
 
 
 def reg(request):
@@ -57,6 +63,7 @@ def reg(request):
                 if user.suc != 0:
                     if check_password(password, user.password):
                         request.session['user'] = email
+                        return redirect('/')
                     else:
                         error += 'Пароль введен не корректно!'
                 else:
@@ -83,3 +90,11 @@ def logout(request):
     if request.method == 'POST' and 'user' in request.session:
         del request.session['user']
     return redirect('/')
+
+
+def update(request):
+    if 'user' in request.session and request.method == 'POST':
+        login = request.POST['login']
+        email = request.POST['email']
+        User.objects.filter(email=request.session['user']).update(login=login, email=email)
+        return redirect('/')
