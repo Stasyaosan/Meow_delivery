@@ -7,4 +7,6 @@ urlpatterns = [
     path('suc/<str:token>', suc_user),
     path('logout', logout),
     path('update', update),
+    path('ajax_load_address', ajax_load_address),
+    path('add_order', add_order),
 ]

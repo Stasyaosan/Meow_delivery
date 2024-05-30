@@ -4,6 +4,58 @@
 
 {% block content %}
 <h1>Meow delivery</h1>
-<h1>{{geo}}</h1>
+{% if 'role' in request.session %}
+{% if request.session.role == 'Клиент' %}
+    <form method="post" action="/add_order">
+        {% csrf_token %}
+        <input type="hidden" class="lon" name="lon"><input type="hidden" class="lat" name="lat">
+        <div class="group_form">
+            <div><label>Адрес:</label></div>
+            <div style="position: relative"><input type="text" class="address" name="address" required placeholder="Адрес">
+                    <div class="list_location" style="position: absolute;left: 4px;background-color: #fff;font-size: 16px"></div>
+               </div>
+        </div>
+        <div class="group_form">
+            <div><label>Описание:</label></div>
+            <div><input type="text" class="description" name="description" placeholder="Описание товара" required></div>
+        </div>
+        <div class="group_form">
+            <div><label>Дата и время:</label></div>
+            <div><input type="datetime-local" name="datetime" placeholder="Дата и время доставки" required></div>
+        </div>
+        <div class="group_form">
+            <button>Добавить заказ</button>
+        </div>
+    </form>
+    {% endif %}
+{% else %}
 <div id="map" style="width: 100%; height: 80%"></div>
+{% endif %}
+<script src="/static/js/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.address').on('input', function(){
+            let address = $(this).val();
+            $.ajax({
+                url: '/ajax_load_address',
+                method: 'post',
+                dataType: 'html',
+                data: {csrfmiddlewaretoken: '{{csrf_token}}', address: address},
+                success: function(data){
+                    $('.list_location').html(data);
+                }
+            });
+        });
+    });
+
+    $(document).on('click', '.bl_location div', function(){
+        let lon = $(this).attr('data-lon');
+        let lat = $(this).attr('data-let');
+        $('.lon').val(lon);
+        $('.lat').val(lat);
+        let txt = $(this).text();
+        $('.address').val(txt);
+        $('.bl_location').hide();
+    });
+</script>
 {% endblock content %}

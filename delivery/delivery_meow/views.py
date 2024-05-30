@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from .models import *
-from .get_geo import get_geo
+from .dadata import gDadata
 
 
 def index(request):
@@ -14,10 +14,9 @@ def index(request):
         current_user = User.objects.filter(email=request.session['user']).first()
     else:
         current_user = ''
-    geo = get_geo('посёлок молодёжный парфеньевский муниципальный округ костромская область')
+    # geo = get_geo('москва')
 
-    return render(request, 'index.html', {'current_user': current_user, 'geo_lat': geo['geo_lat'],
-                                          'geo_lon': geo['geo_lon']})
+    return render(request, 'index.html', {'current_user': current_user})
 
 
 def reg(request):
@@ -63,6 +62,7 @@ def reg(request):
                 if user.suc != 0:
                     if check_password(password, user.password):
                         request.session['user'] = email
+                        request.session['role'] = user.role.title
                         return redirect('/')
                     else:
                         error += 'Пароль введен не корректно!'
@@ -98,3 +98,35 @@ def update(request):
         email = request.POST['email']
         User.objects.filter(email=request.session['user']).update(login=login, email=email)
         return redirect('/')
+
+
+def ajax_load_address(request):
+    if request.method == 'POST':
+        d = gDadata()
+        query = request.POST['address']
+        address = d.get_address(query)
+        res = '<div class="bl_location" style="width: 100%!important;padding: 10px;">'
+        for i in address:
+            res += f'<div data-lon="{i['data']['geo_lon']}" data-let="{i['data']['geo_lat']}" style="width: 100%!important; margin: 10px">{i['value']}</div>'
+        res += '</div>'
+
+        return HttpResponse(res)
+
+
+def add_order(request):
+    if 'user' in request.session and request.method == 'POST':
+        current_user = User.objects.filter(email=request.session['user']).first()
+        address = request.POST['address']
+        description = request.POST['description']
+        datetime = request.POST['datetime']
+        client = current_user
+
+        order = Order()
+        order.address = address
+        order.description = description
+        order.datetime = datetime
+        order.client = client
+        order.save()
+
+        return redirect('/')
+

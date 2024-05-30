@@ -98,3 +98,11 @@ button:hover {
     border-radius: 8px;
     cursor: pointer;
 }
+
+.address {
+    width: 400px;
+}
+
+.description {
+    width: 400px;
+}
