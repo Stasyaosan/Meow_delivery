@@ -24,8 +24,11 @@ class Order(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='client', null=True)
     courier = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courier', null=True, blank=True)
     datetime = models.DateTimeField()
+    lon = models.CharField(max_length=100, null=True, blank=True)
+    lat = models.CharField(max_length=100, null=True, blank=True)
     date_create = models.DateTimeField(auto_now=True)
     address = models.CharField(max_length=200, verbose_name='Адрес')
+    status = models.CharField(max_length=200, default='Ожидает курьера:)')
 
 
 class Review(models.Model):

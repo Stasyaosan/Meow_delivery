@@ -10,13 +10,17 @@ from .dadata import gDadata
 
 
 def index(request):
+    orders = object
     if 'user' in request.session:
         current_user = User.objects.filter(email=request.session['user']).first()
+        if request.session['role'] == 'Клиент':
+            orders = Order.objects.filter(client=current_user)
+
     else:
         current_user = ''
     # geo = get_geo('москва')
 
-    return render(request, 'index.html', {'current_user': current_user})
+    return render(request, 'index.html', {'current_user': current_user, 'orders': orders})
 
 
 def reg(request):
@@ -121,12 +125,7 @@ def add_order(request):
         datetime = request.POST['datetime']
         client = current_user
 
-        order = Order()
-        order.address = address
-        order.description = description
-        order.datetime = datetime
-        order.client = client
+        order = Order(description=description, client=client, address=address, datetime=datetime)
         order.save()
 
         return redirect('/')
-
