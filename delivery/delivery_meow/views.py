@@ -2,7 +2,7 @@ import random
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from .models import *
@@ -10,7 +10,7 @@ from .dadata import gDadata
 
 
 def index(request):
-    orders = object
+    orders = []
     if 'user' in request.session:
         current_user = User.objects.filter(email=request.session['user']).first()
         if request.session['role'] == 'Клиент':
@@ -93,6 +93,8 @@ def generate_Token():
 def logout(request):
     if request.method == 'POST' and 'user' in request.session:
         del request.session['user']
+    if 'role' in request.session:
+        del request.session['role']
     return redirect('/')
 
 
@@ -123,9 +125,42 @@ def add_order(request):
         address = request.POST['address']
         description = request.POST['description']
         datetime = request.POST['datetime']
+        lon = request.POST['lon']
+        lat = request.POST['lat']
         client = current_user
 
-        order = Order(description=description, client=client, address=address, datetime=datetime)
+        order = Order(description=description, client=client, address=address, datetime=datetime, lon=lon, lat=lat)
         order.save()
 
         return redirect('/')
+
+
+def get_json_order(request):
+    orders = Order.objects.all()
+    res = {}
+    res['type'] = 'FeatureCollection'
+    res['features'] = []
+    for order in orders:
+        res['features'].append(
+            {
+                'type': 'Feature',
+                'id': order.id,
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [
+                        order.lat,
+                        order.lon
+                    ]
+                },
+                'properties': {
+                    "balloonContentHeader": "<font size=3><b><a target='_blank' href='https://yandex.ru'>Здесь может быть ваша ссылка</a></b></font>",
+                    "balloonContentBody": "<p>Ваше имя: <input name='login'></p><p><em>Телефон в формате 2xxx-xxx:</em>  <input></p><p><input type='submit' value='Отправить'></p>",
+                    "balloonContentFooter": "<font size=1>Информация предоставлена: </font> <strong>этим балуном</strong>",
+                    "clusterCaption": "<strong><s>Еще</s> одна</strong> метка",
+                    "hintContent": "<strong>Текст  <s>подсказки</s></strong>"
+
+                }
+
+            }
+        )
+    return JsonResponse(res)

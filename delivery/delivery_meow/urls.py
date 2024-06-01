@@ -9,4 +9,5 @@ urlpatterns = [
     path('update', update),
     path('ajax_load_address', ajax_load_address),
     path('add_order', add_order),
+    path('json_order', get_json_order),
 ]

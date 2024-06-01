@@ -3,9 +3,9 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
-<h1>Meow delivery</h1>
 {% if 'role' in request.session %}
 {% if request.session.role == 'Клиент' %}
+    <h1>Meow delivery</h1>
     <form method="post" action="/add_order">
         {% csrf_token %}
         <input type="hidden" class="lon" name="lon"><input type="hidden" class="lat" name="lat">
@@ -45,10 +45,12 @@
         </tr>
     {% endfor %}
 </table>
-    {% endif %}
-{% else %}
-<div id="map" style="width: 100%; height: 80%"></div>
+
+{% elif request.session.role == 'Курьер' %}
+<h1>Доступные заказы</h1>
 {% endif %}
+{% endif %}
+<div id="map" style="width: 100%; height: 80%"></div>
 <script src="/static/js/jquery.min.js"></script>
 <script>
     $(document).ready(function(){
