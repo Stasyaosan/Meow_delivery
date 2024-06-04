@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=cf6e43cb-75a1-41b4-813c-23fdef7f03f4&lang=ru_RU" type="text/javascript"></script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="left">
+        <div class="logo">
+            <img src="/static/images/logo.png">
+        </div>
+        <div class="reg_auth">
+            {% if 'user' in request.session %}
+            <form method="post" action="/update">
+                {% csrf_token %}
+                <div class="group_form">
+                    <div><label>Логин:</label></div>
+                    <div><input type="text" name="login" value="{{current_user.login}}" required></div>
+                </div>
+                <div class="group_form">
+                    <div><label>Email:</label></div>
+                    <div><input type="text" name="email" value="{{current_user.email}}" required></div>
+                </div>
+                <div class="group_form">
+                    <div><label>Роль:</label></div>
+                    <div><input type="text" name="role" value="{{current_user.role}}" readonly></div>
+                </div>
+                <div class="group_form">
+                    <div><label>Уровень:</label></div>
+                    <div><input type="text" name="level" value="{{current_user.level}}" readonly></div>
+                </div>
+                <div class="group_form">
+                    <button>Обновить</button>
+                </div>
+            </form>
+            <div class="group_form">
+                <form action="/logout" method="post">
+                    {% csrf_token %}
+                    <button>Выход</button>
+                </form>
+            </div>
+            {% else %}
+            {% if error != '' %}
+            <p>{{error}}</p>
+            {% endif %}
+            {% if suc != '' %}
+            <p>{{suc}}</p>
+            {% endif %}
+            <form method="post" action="/reg">
+                {% csrf_token %}
+                <div class="group_form">
+                    <div><label>Email:</label></div>
+                    <div><input type="text" name="email" required></div>
+                </div>
+                <div class="group_form">
+                    <div><label>Телефон:</label></div>
+                    <div><input type="text" name="phone" id="phone"></div>
+                </div>
+                <div class="group_form">
+                    <div><label>Пароль:</label></div>
+                    <div><input type="password" name="password" required></div>
+                </div>
+                <div class="group_form">
+                    <div><label>Роль:</label></div>
+                    <div>
+                        <select name="role" id="">
+                            <option value="Курьер">Курьер</option>
+                            <option value="Клиент">Клиент</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="rep_password group_form">
+                    <a href="#">Забыли пароль</a>
+                </div>
+                <div class="buttons group_form">
+                    <button class="auth" name="auth">Авторизация</button>
+                    <button class="reg" name="reg">Регистрация</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+        <div class="banner">
+            <img src="images/" alt="Реклама">
+        </div>
+    </div>
+    <div class="conteiner">
+        {% block content %}{% endblock content%}
+    </div>
+</div>
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/jquery.maskedinput.min.js"></script>
+<script>
+    $('#phone').mask("+9(999) 999-99-99");
+</script>
+<script type="text/javascript">
+    ymaps.ready(init);
+
+function init () {
+    var myMap = new ymaps.Map('map', {
+            center: [55.76, 37.64],
+            zoom: 10
+        }, {
+            searchControlProvider: 'yandex#search'
+        }),
+        objectManager = new ymaps.ObjectManager({
+            // Чтобы метки начали кластеризоваться, выставляем опцию.
+            clusterize: true,
+            // ObjectManager принимает те же опции, что и кластеризатор.
+            gridSize: 32,
+            clusterDisableClickZoom: true
+        });
+
+    // Чтобы задать опции одиночным объектам и кластерам,
+    // обратимся к дочерним коллекциям ObjectManager.
+    objectManager.objects.options.set('preset', 'islands#greenDotIcon');
+    objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
+    myMap.geoObjects.add(objectManager);
+
+    $.ajax({
+        url: "/json_order"
+    }).done(function(data) {
+        objectManager.add(data);
+    });
+
+}
+</script>
+</body>
+</html>
