@@ -5,6 +5,8 @@ from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import *
 from .dadata import gDadata
 
@@ -136,31 +138,76 @@ def add_order(request):
 
 
 def get_json_order(request):
-    orders = Order.objects.all()
+    orders = Order.objects.filter(status='Ожидает курьера:)')
+    if 'user' in request.session:
+        if request.session['role'] == 'Клиент':
+            orders = Order.objects.filter(client=User.objects.filter(email=request.session['user']).first())
     res = {}
     res['type'] = 'FeatureCollection'
     res['features'] = []
     for order in orders:
-        res['features'].append(
-            {
-                'type': 'Feature',
-                'id': order.id,
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [
-                        order.lat,
-                        order.lon
-                    ]
-                },
-                'properties': {
-                    "balloonContentHeader": "<font size=3><b><a target='_blank' href='https://yandex.ru'>Здесь может быть ваша ссылка</a></b></font>",
-                    "balloonContentBody": "<p>Ваше имя: <input name='login'></p><p><em>Телефон в формате 2xxx-xxx:</em>  <input></p><p><input type='submit' value='Отправить'></p>",
-                    "balloonContentFooter": "<font size=1>Информация предоставлена: </font> <strong>этим балуном</strong>",
-                    "clusterCaption": "<strong><s>Еще</s> одна</strong> метка",
-                    "hintContent": "<strong>Текст  <s>подсказки</s></strong>"
+        if 'user' in request.session:
+            if request.session['role'] == 'Клиент':
+                res['features'].append(
+                    {
+                        'type': 'Feature',
+                        'id': order.id,
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [
+                                order.lat,
+                                order.lon
 
-                }
+                            ]
+                        },
+                        'properties': {
+                            "balloonContentBody": '<p><form action="/otmena" method="post"><input type="hidden" name="id_order" value="' + str(
+                                order.id) + '"><button>Отменить заказ</button></form></p>',
+                        }
 
-            }
-        )
+                    }
+                )
+            else:
+                res['features'].append(
+                    {
+                        'type': 'Feature',
+                        'id': order.id,
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [
+                                order.lat,
+                                order.lon
+
+                            ]
+                        },
+                        'properties': {
+                            "balloonContentBody": '<p><form action="/take_order" method="post"><input type="hidden" name="id_order" value="' + str(
+                                order.id) + '"><button>Взять заказ</button></form></p>',
+                        }
+
+                    }
+                )
     return JsonResponse(res)
+
+
+@csrf_exempt
+def take_order(request):
+    if 'user' in request.session:
+        if request.method == 'POST':
+            if request.session['role'] == 'Курьер':
+                current_user = User.objects.filter(email=request.session['user']).first()
+                id_order = request.POST['id_order']
+                Order.objects.filter(id=id_order).update(courier=current_user, status='Заказ принят')
+
+    return redirect('/')
+
+
+@csrf_exempt
+def otmena_order(request):
+    if 'user' in request.session:
+        if request.method == 'POST':
+            if request.session['role'] == 'Клиент':
+                id_order = request.POST['id_order']
+                Order.objects.filter(id=id_order).delete()
+
+    return redirect('/')

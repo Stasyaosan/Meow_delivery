@@ -34,6 +34,7 @@
             <th>Дата создания</th>
             <th>Адрес</th>
             <th>Статус</th>
+
         </tr>
     {% for order in orders %}
         <tr>
@@ -41,7 +42,11 @@
             <td>{{order.datetime}}</td>
             <td>{{order.date_create}}</td>
             <td>{{order.address}}</td>
-            <td>{{order.status}}</td>
+            <td>{{order.status}}
+            {% if order.courier != null %}
+               <p> <b>Ваш курьер:</b> {{order.courier.email}}</p>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
 </table>

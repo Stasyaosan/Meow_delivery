@@ -10,4 +10,6 @@ urlpatterns = [
     path('ajax_load_address', ajax_load_address),
     path('add_order', add_order),
     path('json_order', get_json_order),
+    path('take_order', take_order),
+    path('otmena', otmena_order),
 ]
