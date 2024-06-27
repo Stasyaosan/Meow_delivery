@@ -12,4 +12,5 @@ urlpatterns = [
     path('json_order', get_json_order),
     path('take_order', take_order),
     path('otmena', otmena_order),
+    path('my_orders', my_orders),
 ]

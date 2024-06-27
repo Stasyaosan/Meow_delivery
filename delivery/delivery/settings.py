@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*zk5ag(2c41j=vc!)7km=7rw-s!%0hi9)^)l%o%)2l55z%1x$p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "web"]
 
 
 # Application definition
@@ -74,14 +74,25 @@ WSGI_APPLICATION = 'delivery.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'delivery',
+#         'USER': 'root',
+#         'PASSWORD': 'Av4936754',
+#         'HOST': 'localhost',
+#         'PORT': '3307'
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'delivery',
-        'USER': 'root',
-        'PASSWORD': 'Av4936754',
-        'HOST': 'localhost',
-        'PORT': '3306'
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": 'delivery',  # Название БД
+        "USER": 'root',  # Пользователь для подключения
+        "PASSWORD": 'Av4936754',  # Пароль для этого пользователя
+        "HOST": 'localhost',  # Адрес, на котором развернут сервер БД
+        "PORT": 5050,  # Порт, на котором работает сервер БД
     }
 }
 

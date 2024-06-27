@@ -12,7 +12,7 @@
         <div class="group_form">
             <div><label>Адрес:</label></div>
             <div style="position: relative"><input type="text" class="address" name="address" required placeholder="Адрес">
-                    <div class="list_location" style="position: absolute;left: 4px;background-color: #fff;font-size: 16px"></div>
+                    <div class="list_location"></div>
                </div>
         </div>
         <div class="group_form">
@@ -73,19 +73,6 @@
         });
     });
 
-    $(document).on('click', '.bl_location div', function(){
-        let lon = $(this).attr('data-lon');
-        let lat = $(this).attr('data-let');
-        $('.lon').val(lon);
-        $('.lat').val(lat);
-        let txt = $(this).text();
-        $('.address').val(txt);
-        $('.bl_location').hide();
-    });
+
 </script>
-<style>
-        td{
-            padding: 6px
-        }
-    </style>
 {% endblock content %}

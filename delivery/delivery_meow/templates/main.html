@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=cf6e43cb-75a1-41b4-813c-23fdef7f03f4&lang=ru_RU" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=cf6e43cb-75a1-41b4-813c-23fdef7f03f4&lang=ru_RU"
+            type="text/javascript"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -84,49 +85,58 @@
             {% endif %}
         </div>
         <div class="banner">
-            <img src="images/" alt="Реклама">
+            {% if 'user' in request.session %}
+            {% if request.session.role == 'Курьер' %}
+            <ul>
+                <li>
+                    <a href="/my_orders">
+                        Мои заказы
+                    </a>
+                </li>
+            </ul>
+            {% endif %}
+            {% endif %}
         </div>
     </div>
     <div class="conteiner">
         {% block content %}{% endblock content%}
     </div>
+
 </div>
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/jquery.maskedinput.min.js"></script>
-<script>
-    $('#phone').mask("+9(999) 999-99-99");
-</script>
+<script type="text/javascript" src="/static/js/main.js"></script>
 <script type="text/javascript">
     ymaps.ready(init);
 
-function init () {
-    var myMap = new ymaps.Map('map', {
-            center: [55.76, 37.64],
-            zoom: 10
-        }, {
-            searchControlProvider: 'yandex#search'
-        }),
-        objectManager = new ymaps.ObjectManager({
-            // Чтобы метки начали кластеризоваться, выставляем опцию.
-            clusterize: true,
-            // ObjectManager принимает те же опции, что и кластеризатор.
-            gridSize: 32,
-            clusterDisableClickZoom: true
+    function init () {
+        var myMap = new ymaps.Map('map', {
+                center: [55.76, 37.64],
+                zoom: 10
+            }, {
+                searchControlProvider: 'yandex#search'
+            }),
+            objectManager = new ymaps.ObjectManager({
+                // Чтобы метки начали кластеризоваться, выставляем опцию.
+                clusterize: true,
+                // ObjectManager принимает те же опции, что и кластеризатор.
+                gridSize: 32,
+                clusterDisableClickZoom: true
+            });
+
+        // Чтобы задать опции одиночным объектам и кластерам,
+        // обратимся к дочерним коллекциям ObjectManager.
+        objectManager.objects.options.set('preset', 'islands#greenDotIcon');
+        objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
+        myMap.geoObjects.add(objectManager);
+
+        $.ajax({
+            url: "/json_order?action=0"
+        }).done(function(data) {
+            objectManager.add(data);
         });
 
-    // Чтобы задать опции одиночным объектам и кластерам,
-    // обратимся к дочерним коллекциям ObjectManager.
-    objectManager.objects.options.set('preset', 'islands#greenDotIcon');
-    objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
-    myMap.geoObjects.add(objectManager);
-
-    $.ajax({
-        url: "/json_order"
-    }).done(function(data) {
-        objectManager.add(data);
-    });
-
-}
+    }
 </script>
 </body>
 </html>

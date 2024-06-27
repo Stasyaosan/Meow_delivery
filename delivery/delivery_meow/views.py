@@ -138,10 +138,15 @@ def add_order(request):
 
 
 def get_json_order(request):
+    action = int(request.GET['action'])
     orders = Order.objects.filter(status='Ожидает курьера:)')
     if 'user' in request.session:
         if request.session['role'] == 'Клиент':
             orders = Order.objects.filter(client=User.objects.filter(email=request.session['user']).first())
+        else:
+            if action == 1:
+                orders = Order.objects.filter(courier=User.objects.filter(email=request.session['user']).first())
+
     res = {}
     res['type'] = 'FeatureCollection'
     res['features'] = []
@@ -167,26 +172,47 @@ def get_json_order(request):
 
                     }
                 )
+
             else:
-                res['features'].append(
-                    {
-                        'type': 'Feature',
-                        'id': order.id,
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [
-                                order.lat,
-                                order.lon
+                if action == 1:
+                    res['features'].append(
+                        {
+                            'type': 'Feature',
+                            'id': order.id,
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    order.lat,
+                                    order.lon
 
-                            ]
-                        },
-                        'properties': {
-                            "balloonContentBody": '<p><form action="/take_order" method="post"><input type="hidden" name="id_order" value="' + str(
-                                order.id) + '"><button>Взять заказ</button></form></p>',
+                                ]
+                            },
+                            'properties': {
+                                "balloonContentBody": f'<p><b>Описание заказа:</b> {order.description}</p><p><b>Контакты клиента:</b> {order.client.phone}</p><p><b>Дата и время:</b> {order.datetime}</p><p><b>Адрес:</b> {order.address}</p><p><b>Статус:</b> {order.status}</p>',
+                            }
+
                         }
+                    )
+                else:
+                    res['features'].append(
+                        {
+                            'type': 'Feature',
+                            'id': order.id,
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    order.lat,
+                                    order.lon
 
-                    }
-                )
+                                ]
+                            },
+                            'properties': {
+                                "balloonContentBody": '<p><form action="/take_order" method="post"><input type="hidden" name="id_order" value="' + str(
+                                    order.id) + '"><button>Взять заказ</button></form></p>',
+                            }
+
+                        }
+                    )
     return JsonResponse(res)
 
 
@@ -206,8 +232,20 @@ def take_order(request):
 def otmena_order(request):
     if 'user' in request.session:
         if request.method == 'POST':
+            id_order = request.POST['id_order']
             if request.session['role'] == 'Клиент':
-                id_order = request.POST['id_order']
                 Order.objects.filter(id=id_order).delete()
 
+            else:
+                Order.objects.filter(id=id_order).update(status='отменён курьером', courier=None)
+
     return redirect('/')
+
+
+def my_orders(request):
+    if 'user' in request.session:
+        if request.session['role'] == 'Курьер':
+            current_user = User.objects.filter(email=request.session['user']).first()
+            orders = Order.objects.filter(courier=current_user)
+
+            return render(request, 'user/my_orders.html', context={'orders': orders, 'current_user': current_user})
