@@ -88,11 +88,11 @@ WSGI_APPLICATION = 'delivery.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": 'delivery',  # Название БД
-        "USER": 'root',  # Пользователь для подключения
-        "PASSWORD": 'Av4936754',  # Пароль для этого пользователя
-        "HOST": 'localhost',  # Адрес, на котором развернут сервер БД
-        "PORT": 5050,  # Порт, на котором работает сервер БД
+        "NAME": 'delivery',
+        "USER": 'root',
+        "PASSWORD": 'Av4936754',
+        "HOST": 'db',
+        "PORT": 5432,
     }
 }
 
